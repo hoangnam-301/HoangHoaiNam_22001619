@@ -1,0 +1,114 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f5f5f5;
+    color: #222;
+}
+
+header {
+    background: #333;
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+
+header h1 {
+    margin: 0 0 15px;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    margin: 0 10px;
+}
+
+nav a:hover {
+    text-decoration: underline;
+}
+
+.container {
+    width: 90%;
+    max-width: 1000px;
+    margin: 30px auto;
+    background: white;
+    padding: 25px;
+    min-height: 500px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th, td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: left;
+}
+
+th {
+    background: #eee;
+}
+
+form {
+    max-width: 600px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: bold;
+}
+
+input {
+    width: 100%;
+    padding: 9px;
+    border: 1px solid #aaa;
+}
+
+button, .button {
+    display: inline-block;
+    padding: 9px 14px;
+    border: 0;
+    background: #333;
+    color: white;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.button-edit {
+    background: #2878c8;
+}
+
+.button-delete {
+    background: #c62828;
+}
+
+.message {
+    padding: 10px;
+    background: #e8f5e9;
+    border: 1px solid #81c784;
+    margin-bottom: 15px;
+}
+
+.error {
+    padding: 10px;
+    background: #ffebee;
+    border: 1px solid #e57373;
+    margin-bottom: 15px;
+}
+
+footer {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+}
