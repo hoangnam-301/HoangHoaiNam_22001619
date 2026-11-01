@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bài thực hành số 6 - VueJS</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 30px 16px;
+      font-family: Arial, sans-serif;
+      background: #f3f5f9;
+      color: #263238;
+    }
+    .container { max-width: 1000px; margin: auto; }
+    h1 { text-align: center; color: #243b64; margin-bottom: 28px; }
+    h2 { color: #244a78; margin-top: 0; }
+    .exercise {
+      background: white;
+      padding: 24px;
+      margin-bottom: 25px;
+      border-radius: 12px;
+      box-shadow: 0 3px 14px #00000012;
+    }
+    .student-card { display: flex; gap: 22px; align-items: center; flex-wrap: wrap; }
+    .student-card img { width: 145px; height: 145px; border-radius: 12px; object-fit: cover; }
+    .student-info p { margin: 9px 0; }
+    .grade { font-weight: bold; }
+    .excellent { color: #16834a; }
+    .good { color: #1769aa; }
+    .average { color: #b7791f; }
+    .failed { color: #c53030; }
+    button {
+      border: 0; border-radius: 6px; padding: 9px 15px;
+      background: #2864b4; color: white; cursor: pointer; margin: 5px 4px 5px 0;
+    }
+    button:hover { background: #194b8d; }
+    button:disabled { background: #aab4c1; cursor: not-allowed; }
+    input, select {
+      padding: 9px; border: 1px solid #cbd3df; border-radius: 6px;
+      margin: 5px 0 12px; max-width: 100%;
+    }
+    label { display: block; margin: 8px 0; }
+    .field { margin-bottom: 8px; }
+    .field > label { font-weight: 600; }
+    .result {
+      background: #eef6ff; border-left: 4px solid #2864b4;
+      padding: 13px; margin-top: 15px; border-radius: 5px;
+    }
+    .task-list { list-style: none; padding: 0; }
+    .task-list li {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px; border-bottom: 1px solid #e5e9ef;
+    }
+    .task-list li label { flex: 1; margin: 0; }
+    .completed { text-decoration: line-through; color: #89939f; }
+    .stats { color: #526174; margin: 12px 0; }
+    .filters { margin: 12px 0; }
+    .filters button.active { background: #183d70; }
+    .muted { color: #6b7280; }
+    @media (max-width: 600px) {
+      .exercise { padding: 17px; }
+      .student-card { align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>BÀI THỰC HÀNH SỐ 6 - VUEJS</h1>
+
+    <section id="bai1" class="exercise">
+      <h2>Bài 1. Thẻ thông tin sinh viên</h2>
+      <div class="student-card">
+        <img :src="student.avatar" :alt="student.fullName">
+        <div class="student-info">
+          <p><strong>Mã sinh viên:</strong> {{ student.id }}</p>
+          <p><strong>Họ và tên:</strong> {{ student.fullName }}</p>
+          <p><strong>Lớp:</strong> <span v-text="student.className"></span></p>
+          <p><strong>Điểm trung bình:</strong> {{ student.gpa }}</p>
+          <p>
+            <strong>Xếp loại:</strong>
+            <span class="grade" :class="gradeClass">{{ grade }}</span>
+          </p>
+          <p><strong>Trạng thái:</strong> {{ student.isStudying ? 'Đang học' : 'Đã nghỉ' }}</p>
+        </div>
+      </div>
+
+      <button @click="showIntroduction = !showIntroduction">
+        {{ showIntroduction ? 'Ẩn giới thiệu' : 'Hiện giới thiệu' }}
+      </button>
+      <p v-show="showIntroduction" class="result">
+        Xin chào! Tôi là {{ student.fullName }}, sinh viên lớp {{ student.className }}.
+        Tôi luôn cố gắng học tập và rèn luyện để đạt kết quả tốt.
+      </p>
+
+      <h3>Thay đổi dữ liệu sinh viên</h3>
+      <div class="field">
+        <label>Họ và tên</label>
+        <input v-model="student.fullName">
+      </div>
+      <div class="field">
+        <label>Lớp</label>
+        <input v-model="student.className">
+      </div>
+      <div class="field">
+        <label>Ảnh đại diện (URL)</label>
+        <input v-model="student.avatar" style="width: min(100%, 420px)">
+      </div>
+      <div class="field">
+        <label>Điểm trung bình</label>
+        <input type="number" v-model.number="student.gpa" min="0" max="10" step="0.1">
+      </div>
+      <label><input type="checkbox" v-model="student.isStudying"> Đang học</label>
+    </section>
+
+    <section id="bai2" class="exercise">
+      <h2>Bài 2. Đặt vé xem phim</h2>
+      <form @submit.prevent="bookTicket">
+        <div class="field">
+          <label>Họ tên khách hàng</label>
+          <input v-model.trim="customerName" placeholder="Nhập họ tên khách hàng" style="width: min(100%, 420px)">
+        </div>
+
+        <div class="field">
+          <label>Suất chiếu</label>
+          <select v-model="showtime">
+            <option value="09:00">09:00</option>
+            <option value="14:00">14:00</option>
+            <option value="19:00">19:00</option>
+            <option value="21:30">21:30</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Loại vé</label>
+          <label><input type="radio" value="normal" v-model="ticketType"> Vé thường - 70.000 đồng</label>
+          <label><input type="radio" value="vip" v-model="ticketType"> Vé VIP - 100.000 đồng</label>
+        </div>
+
+        <div class="field">
+          <label>Số lượng vé (1 - 10)</label>
+          <input type="number" v-model.number="quantity" min="1" max="10" step="1">
+          <div>
+            <button type="button" @click="decreaseQuantity" :disabled="quantity <= 1">-</button>
+            <button type="button" @click="increaseQuantity" :disabled="quantity >= 10">+</button>
+          </div>
+        </div>
+
+        <label><input type="checkbox" v-model="hasCombo"> Combo bắp nước - 45.000 đồng</label>
+
+        <div class="result">
+          <p>Giá vé: {{ formatMoney(ticketPrice) }}</p>
+          <p>Số lượng: {{ quantity }}</p>
+          <p>Tiền combo: {{ formatMoney(comboPrice) }}</p>
+          <strong>Tổng tiền: {{ formatMoney(totalPrice) }}</strong>
+        </div>
+
+        <button type="submit" :disabled="!isFormValid">Đặt vé</button>
+        <button type="button" @click="resetForm">Đặt lại</button>
+      </form>
+
+      <div v-if="confirmation" class="result">
+        <h3>Đặt vé thành công!</h3>
+        <p>Khách hàng: {{ confirmation.name }}</p>
+        <p>Suất chiếu: {{ confirmation.showtime }}</p>
+        <p>Loại vé: {{ confirmation.ticketType }}</p>
+        <p>Số lượng vé: {{ confirmation.quantity }}</p>
+        <p>Combo bắp nước: {{ confirmation.combo ? 'Có' : 'Không' }}</p>
+        <strong>Tổng thanh toán: {{ formatMoney(confirmation.total) }}</strong>
+      </div>
+    </section>
+
+    <section id="bai3" class="exercise">
+      <h2>Bài 3. Quản lý công việc cá nhân</h2>
+      <form @submit.prevent="addTask">
+        <input
+          v-model.trim="newTask"
+          @keyup.enter="addTask"
+          placeholder="Nhập tên công việc..."
+          style="width: min(100%, 420px)"
+        >
+        <button type="submit">Thêm</button>
+      </form>
+
+      <div class="stats">
+        Tổng số công việc: <strong>{{ totalTasks }}</strong> |
+        Chưa hoàn thành: <strong>{{ unfinishedTasks }}</strong>
+      </div>
+
+      <div class="filters">
+        <button
+          v-for="item in filters"
+          :key="item.value"
+          @click="currentFilter = item.value"
+          :class="{ active: currentFilter === item.value }"
+        >{{ item.label }}</button>
+      </div>
+
+      <ul v-if="filteredTasks.length > 0" class="task-list">
+        <li v-for="task in filteredTasks" :key="task.id">
+          <input type="checkbox" v-model="task.completed">
+          <label :class="{ completed: task.completed }">{{ task.name }}</label>
+          <button @click="deleteTask(task.id)">Xóa</button>
+        </li>
+      </ul>
+      <p v-else class="muted">
+        {{ tasks.length === 0 ? 'Danh sách công việc đang trống.' : 'Không có công việc phù hợp với bộ lọc.' }}
+      </p>
+
+      <button @click="clearCompleted" :disabled="!hasCompletedTasks">
+        Xóa các việc đã hoàn thành
+      </button>
+    </section>
+  </div>
+
+  <script>
+    const { createApp } = Vue;
+
+    createApp({
+      data() {
+        return {
+          student: {
+            id: '22001619',
+            fullName: 'Nguyễn Văn An',
+            className: 'CNTT K22',
+            avatar: 'https://i.pravatar.cc/300?img=12',
+            gpa: 8.2,
+            isStudying: true
+          },
+          showIntroduction: false
+        };
+      },
+      computed: {
+        grade() {
+          if (this.student.gpa >= 8 && this.student.gpa <= 10) return 'Giỏi';
+          if (this.student.gpa >= 6.5 && this.student.gpa < 8) return 'Khá';
+          if (this.student.gpa >= 5 && this.student.gpa < 6.5) return 'Trung bình';
+          return 'Chưa đạt';
+        },
+        gradeClass() {
+          if (this.grade === 'Giỏi') return 'excellent';
+          if (this.grade === 'Khá') return 'good';
+          if (this.grade === 'Trung bình') return 'average';
+          return 'failed';
+        }
+      }
+    }).mount('#bai1');
+
+    createApp({
+      data() {
+        return {
+          customerName: '',
+          showtime: '19:00',
+          ticketType: 'normal',
+          quantity: 1,
+          hasCombo: false,
+          confirmation: null
+        };
+      },
+      computed: {
+        ticketPrice() {
+          return this.ticketType === 'vip' ? 100000 : 70000;
+        },
+        comboPrice() {
+          return this.hasCombo ? 45000 : 0;
+        },
+        totalPrice() {
+          return this.ticketPrice * this.quantity + this.comboPrice;
+        },
+        isQuantityValid() {
+          return Number.isInteger(this.quantity) && this.quantity >= 1 && this.quantity <= 10;
+        },
+        isFormValid() {
+          return this.customerName.trim().length > 0 && this.isQuantityValid;
+        }
+      },
+      methods: {
+        formatMoney(value) {
+          return new Intl.NumberFormat('vi-VN').format(value) + ' đồng';
+        },
+        increaseQuantity() {
+          if (this.quantity < 10) this.quantity++;
+        },
+        decreaseQuantity() {
+          if (this.quantity > 1) this.quantity--;
+        },
+        resetForm() {
+          this.customerName = '';
+          this.showtime = '19:00';
+          this.ticketType = 'normal';
+          this.quantity = 1;
+          this.hasCombo = false;
+          this.confirmation = null;
+        },
+        bookTicket() {
+          if (!this.isFormValid) return;
+          this.confirmation = {
+            name: this.customerName,
+            showtime: this.showtime,
+            ticketType: this.ticketType === 'vip' ? 'VIP' : 'Thường',
+            quantity: this.quantity,
+            combo: this.hasCombo,
+            total: this.totalPrice
+          };
+        }
+      }
+    }).mount('#bai2');
+
+    createApp({
+      data() {
+        return {
+          newTask: '',
+          nextId: 4,
+          currentFilter: 'all',
+          filters: [
+            { label: 'Tất cả', value: 'all' },
+            { label: 'Chưa hoàn thành', value: 'unfinished' },
+            { label: 'Đã hoàn thành', value: 'completed' }
+          ],
+          tasks: [
+            { id: 1, name: 'Hoàn thành bài tập VueJS', completed: false },
+            { id: 2, name: 'Ôn tập kiến thức JavaScript', completed: true },
+            { id: 3, name: 'Đọc tài liệu môn học', completed: false }
+          ]
+        };
+      },
+      computed: {
+        totalTasks() {
+          return this.tasks.length;
+        },
+        unfinishedTasks() {
+          return this.tasks.filter(task => !task.completed).length;
+        },
+        hasCompletedTasks() {
+          return this.tasks.some(task => task.completed);
+        },
+        filteredTasks() {
+          if (this.currentFilter === 'unfinished') {
+            return this.tasks.filter(task => !task.completed);
+          }
+          if (this.currentFilter === 'completed') {
+            return this.tasks.filter(task => task.completed);
+          }
+          return this.tasks;
+        }
+      },
+      methods: {
+        addTask() {
+          const name = this.newTask.trim();
+          if (!name) return;
+          this.tasks.push({
+            id: this.nextId++,
+            name,
+            completed: false
+          });
+          this.newTask = '';
+        },
+        deleteTask(id) {
+          this.tasks = this.tasks.filter(task => task.id !== id);
+        },
+        clearCompleted() {
+          this.tasks = this.tasks.filter(task => !task.completed);
+        }
+      }
+    }).mount('#bai3');
+  </script>
+</body>
+</html>
