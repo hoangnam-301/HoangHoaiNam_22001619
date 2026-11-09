@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 1 - Quản lý sản phẩm</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app" class="container">
+    <h1>Quản lý sản phẩm</h1>
+    <p class="status">Trạng thái trang: <strong>{{ trangThai }}</strong></p>
+
+    <section class="panel">
+        <h2>Tìm kiếm và lọc sản phẩm</h2>
+        <div class="controls">
+            <input v-model="tuKhoa" type="text" placeholder="Nhập tên sản phẩm...">
+            <select v-model="danhMucChon">
+                <option value="">Tất cả danh mục</option>
+                <option v-for="danhMuc in danhMucList" :key="danhMuc" :value="danhMuc">
+                    {{ danhMuc }}
+                </option>
+            </select>
+            <select v-model="thuTuSapXep">
+                <option value="none">Không sắp xếp</option>
+                <option value="asc">Giá tăng dần</option>
+                <option value="desc">Giá giảm dần</option>
+            </select>
+        </div>
+        <p v-if="thongBao" class="warning">{{ thongBao }}</p>
+    </section>
+
+    <section class="panel">
+        <h2>Thêm sản phẩm</h2>
+        <form @submit.prevent="themSanPham" class="controls">
+            <input v-model.trim="sanPhamMoi.ten" type="text" placeholder="Tên sản phẩm">
+            <input v-model.number="sanPhamMoi.gia" type="number" min="0" step="1000" placeholder="Giá">
+            <select v-model="sanPhamMoi.danhMuc">
+                <option disabled value="">Chọn danh mục</option>
+                <option v-for="danhMuc in danhMucList" :key="danhMuc" :value="danhMuc">
+                    {{ danhMuc }}
+                </option>
+            </select>
+            <input v-model.number="sanPhamMoi.tonKho" type="number" min="0" step="1" placeholder="Số lượng tồn">
+            <button type="submit">Thêm sản phẩm</button>
+        </form>
+        <p v-if="loi" class="error">{{ loi }}</p>
+    </section>
+
+    <section class="panel">
+        <h2>Danh sách sản phẩm</h2>
+        <p>Đang hiển thị <strong>{{ sanPhamHienThi.length }}</strong> / {{ sanPhams.length }} sản phẩm</p>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th><th>Tên sản phẩm</th><th>Giá</th>
+                        <th>Danh mục</th><th>Tồn kho</th><th>Trạng thái</th><th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="sp in sanPhamHienThi" :key="sp.id">
+                        <td>{{ sp.id }}</td>
+                        <td>{{ sp.ten }}</td>
+                        <td>{{ dinhDangTien(sp.gia) }}</td>
+                        <td>{{ sp.danhMuc }}</td>
+                        <td>{{ sp.tonKho }}</td>
+                        <td>
+                            <span :class="sp.tonKho > 0 ? 'badge in-stock' : 'badge out-stock'">
+                                {{ sp.tonKho > 0 ? 'Còn hàng' : 'Hết hàng' }}
+                            </span>
+                        </td>
+                        <td><button class="danger" @click="xoaSanPham(sp.id)">Xóa</button></td>
+                    </tr>
+                    <tr v-if="sanPhamHienThi.length === 0">
+                        <td colspan="7" class="empty">Không tìm thấy sản phẩm phù hợp.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="panel">
+        <h2>Thống kê theo danh sách đang hiển thị</h2>
+        <div class="stats">
+            <div class="stat"><span>Số sản phẩm đang hiển thị</span><strong>{{ sanPhamHienThi.length }}</strong></div>
+            <div class="stat"><span>Tổng giá trị tồn kho</span><strong>{{ dinhDangTien(tongGiaTriTonKho) }}</strong></div>
+        </div>
+    </section>
+</div>
+<script src="app.js"></script>
+</body>
+</html>

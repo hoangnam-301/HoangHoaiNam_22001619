@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 2 - Component sản phẩm</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app" class="container">
+    <h1>Danh mục sản phẩm</h1>
+    <p>Component <code>&lt;the-san-pham&gt;</code> nhận dữ liệu từ component cha thông qua props.</p>
+
+    <div class="product-list">
+        <the-san-pham
+            v-for="sanPham in danhSachSanPham"
+            :key="sanPham.id"
+            :ten="sanPham.ten"
+            :gia="sanPham.gia"
+            :anh="sanPham.anh"
+            :mo-ta="sanPham.moTa"
+            :so-luong-ton="sanPham.soLuongTon">
+        </the-san-pham>
+    </div>
+</div>
+
+<script src="components/TheSanPham.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
