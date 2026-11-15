@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quản lý sản phẩm - Thực hành 8</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 32px 16px; font-family: Arial, sans-serif; background: #f4f6f9; color: #222; }
+    .container { max-width: 950px; margin: auto; background: white; padding: 26px; border-radius: 12px; box-shadow: 0 4px 18px #00000010; }
+    h1 { margin-top: 0; color: #1f4e79; }
+    h2 { margin-top: 28px; font-size: 20px; }
+    .form-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 14px; }
+    label { display: block; margin-bottom: 6px; font-weight: 600; }
+    input { width: 100%; padding: 10px; border: 1px solid #cbd2d9; border-radius: 6px; }
+    button { border: 0; padding: 9px 14px; border-radius: 6px; cursor: pointer; margin: 3px; }
+    .save { background: #1769aa; color: white; }
+    .cancel { background: #e5e7eb; }
+    .edit { background: #f0ad4e; }
+    .delete { background: #d9534f; color: white; }
+    table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+    th, td { border: 1px solid #dfe3e8; padding: 11px; text-align: left; }
+    th { background: #edf3f8; }
+    .message { padding: 10px 12px; margin: 14px 0; border-radius: 6px; background: #e8f5e9; }
+    .error { background: #ffebee; color: #b71c1c; }
+    .empty { text-align: center; color: #777; }
+    @media (max-width: 650px) { .form-grid { grid-template-columns: 1fr; } .container { padding: 18px; } }
+  </style>
+</head>
+<body>
+<div id="app" class="container">
+  <h1>Quản lý sản phẩm</h1>
+  <p>Thực hành PHP và Vue.js – API CRUD</p>
+
+  <div v-if="message" class="message" :class="{ error: isError }">{{ message }}</div>
+
+  <h2>{{ editingId ? 'Cập nhật sản phẩm' : 'Thêm sản phẩm' }}</h2>
+  <form @submit.prevent="saveProduct">
+    <div class="form-grid">
+      <div>
+        <label for="name">Tên sản phẩm</label>
+        <input id="name" v-model.trim="form.name" maxlength="100" required>
+      </div>
+      <div>
+        <label for="price">Đơn giá (đồng)</label>
+        <input id="price" v-model.number="form.price" type="number" min="1" step="1" required>
+      </div>
+      <div>
+        <label for="stock">Số lượng tồn</label>
+        <input id="stock" v-model.number="form.stock" type="number" min="0" step="1" required>
+      </div>
+    </div>
+    <div style="margin-top: 14px">
+      <button class="save" type="submit">{{ editingId ? 'Lưu thay đổi' : 'Lưu sản phẩm' }}</button>
+      <button v-if="editingId" class="cancel" type="button" @click="resetForm">Hủy sửa</button>
+    </div>
+  </form>
+
+  <h2>Danh sách sản phẩm</h2>
+  <table>
+    <thead>
+      <tr><th>ID</th><th>Tên sản phẩm</th><th>Đơn giá</th><th>Số lượng tồn</th><th>Thao tác</th></tr>
+    </thead>
+    <tbody>
+      <tr v-for="product in products" :key="product.id">
+        <td>{{ product.id }}</td>
+        <td>{{ product.name }}</td>
+        <td>{{ formatPrice(product.price) }}</td>
+        <td>{{ product.stock }}</td>
+        <td>
+          <button class="edit" @click="editProduct(product)">Sửa</button>
+          <button class="delete" @click="deleteProduct(product)">Xóa</button>
+        </td>
+      </tr>
+      <tr v-if="products.length === 0"><td class="empty" colspan="5">Chưa có sản phẩm.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<script>
+const { createApp } = Vue;
+
+createApp({
+  data() {
+    return {
+      apiUrl: './api/products.php',
+      products: [],
+      editingId: null,
+      form: { name: '', price: 1, stock: 0 },
+      message: '',
+      isError: false
+    };
+  },
+  mounted() {
+    this.loadProducts();
+  },
+  methods: {
+    async request(url, options = {}) {
+      const response = await fetch(url, options);
+      const result = await response.json();
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || 'Yêu cầu không thành công.');
+      }
+      return result;
+    },
+    async loadProducts() {
+      try {
+        const result = await this.request(this.apiUrl);
+        this.products = result.data;
+      } catch (error) {
+        this.showMessage(error.message, true);
+      }
+    },
+    async saveProduct() {
+      const payload = {
+        name: this.form.name,
+        price: this.form.price,
+        stock: this.form.stock
+      };
+      const isEditing = this.editingId !== null;
+      try {
+        await this.request(
+          isEditing ? `${this.apiUrl}?id=${this.editingId}` : this.apiUrl,
+          {
+            method: isEditing ? 'PUT' : 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          }
+        );
+        this.showMessage(isEditing ? 'Cập nhật thành công.' : 'Thêm sản phẩm thành công.');
+        this.resetForm();
+        await this.loadProducts();
+      } catch (error) {
+        this.showMessage(error.message, true);
+      }
+    },
+    editProduct(product) {
+      this.editingId = Number(product.id);
+      this.form = {
+        name: product.name,
+        price: Number(product.price),
+        stock: Number(product.stock)
+      };
+      this.message = '';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
+    async deleteProduct(product) {
+      if (!window.confirm(`Bạn có chắc muốn xóa sản phẩm "${product.name}" không?`)) return;
+      try {
+        await this.request(`${this.apiUrl}?id=${product.id}`, { method: 'DELETE' });
+        this.showMessage('Xóa sản phẩm thành công.');
+        if (this.editingId === Number(product.id)) this.resetForm();
+        await this.loadProducts();
+      } catch (error) {
+        this.showMessage(error.message, true);
+      }
+    },
+    resetForm() {
+      this.editingId = null;
+      this.form = { name: '', price: 1, stock: 0 };
+    },
+    showMessage(message, error = false) {
+      this.message = message;
+      this.isError = error;
+    },
+    formatPrice(value) {
+      return new Intl.NumberFormat('vi-VN').format(value) + ' đ';
+    }
+  }
+}).mount('#app');
+</script>
+</body>
+</html>
